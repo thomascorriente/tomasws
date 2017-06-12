@@ -36,8 +36,8 @@ def webhook():
 
 
 def processRequest(req):
-    if req.get("result").get("action") == "nombre":
-        return "Su nombre es: " + parameters.get("nombre")
+  #  if req.get("result").get("action") == "nombre":
+        return req.get("result").get("action")
     
     if req.get("result").get("action") != "yahooWeatherForecast":
         return {}
