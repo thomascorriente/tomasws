@@ -38,8 +38,8 @@ def webhook():
 def processRequest(req):
     if req.get("result").get("action") == "nombre":
             return {
-        "speech": "Su nombre es"+parameters.get("geo-city"),
-        "displayText": "Su nombre es"+parameters.get("geo-city"),
+        "speech": "Su nombre es"+parameters.get("nombre"),
+        "displayText": "Su nombre es"+parameters.get("nombre"),
         # "data": data,
         # "contextOut": [],
         "source": "apiai-weather-webhook-sample"
