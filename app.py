@@ -82,7 +82,7 @@ def processRequest(req):
         dataWS=data.get('data')
         saldo_pagar=dataWS.get('saldo_pagar')
         print(saldo_pagar)
-        speech="Su saldo a pagar es:" + saldo_pagar
+        speech="Su saldo a pagar es: " + saldo_pagar
         return {
         "speech": speech,
         "displayText": speech,
