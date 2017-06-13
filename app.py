@@ -41,6 +41,23 @@ def processRequest(req):
     
     if req.get("result").get("action") == "nombre":
         print("entro a nombre")
+        result = req.get("result")
+        parameters = result.get("parameters")
+        nombre = parameters.get("nombre")
+        print(nombre)
+        #baseurl = "http://www.aeselsalvadormovil.com/aesmovil/WcfMovil/AESMovil.svc/GetInterrupciones/1244050"
+        baseurl = "http://www.aeselsalvadormovil.com/aesmovil/WcfMovil/AESMovil.svc/GetDetalleFactura/2366498"
+        yql_query = baseurl       
+        yql_url = yql_query #baseurl + urlencode({'q': yql_query}) + "&format=json"
+        print(yql_url)
+        result = urlopen(yql_url).read()
+        print(result)
+        data = json.loads(result)
+        print(data)
+        dataWS=data.get('data')
+        saldo_pagar=dataWS.get('saldo_pagar')
+        print(saldo_pagar)
+        res = makeWebhookResult(data)
         return {
         "speech": "nombre",
         "displayText": "nombre",
@@ -48,18 +65,42 @@ def processRequest(req):
         # "contextOut": [],
         "source": "apiai-weather-webhook-sample"
         }
-    
-    if req.get("result").get("action") != "yahooWeatherForecast":
+    elif req.get("result").get("action") == "consultasaldo":
+        print("Entro a consulta de saldo")
+        result = req.get("result")
+        parameters = result.get("parameters")
+        NICJeson = parameters.get("NIC")
+        print(NICJeson)
+        NIC = NICJeson.get("number")
+        print(NIC)
+        #baseurl = "http://www.aeselsalvadormovil.com/aesmovil/WcfMovil/AESMovil.svc/GetInterrupciones/1244050"
+        baseurl = "http://www.aeselsalvadormovil.com/aesmovil/WcfMovil/AESMovil.svc/GetDetalleFactura/" + str(NIC)
+        result = urlopen(baseurl).read()
+        print(result)
+        data = json.loads(result)
+        print(data)
+        dataWS=data.get('data')
+        saldo_pagar=dataWS.get('saldo_pagar')
+        print(saldo_pagar)
+        speech="Su saldo a pagar es:" + saldo_pagar
+        return {
+        "speech": speech,
+        "displayText": speech,
+        "source": "ConsultaSaldoAES"
+        } 
+    elif req.get("result").get("action") == "yahooWeatherForecast":
+        baseurl = "https://query.yahooapis.com/v1/public/yql?"
+        yql_query = makeYqlQuery(req)
+        if yql_query is None:
+            return {}
+        yql_url = baseurl + urlencode({'q': yql_query}) + "&format=json"
+        print(yql_url)
+        result = urlopen(yql_url).read()
+        data = json.loads(result)
+        res = makeWebhookResult(data)
+        return res
+    else:
         return {}
-    baseurl = "https://query.yahooapis.com/v1/public/yql?"
-    yql_query = makeYqlQuery(req)
-    if yql_query is None:
-        return {}
-    yql_url = baseurl + urlencode({'q': yql_query}) + "&format=json"
-    result = urlopen(yql_url).read()
-    data = json.loads(result)
-    res = makeWebhookResult(data)
-    return res
 
 
 def makeYqlQuery(req):
