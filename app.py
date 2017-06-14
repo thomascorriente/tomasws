@@ -66,28 +66,47 @@ def processRequest(req):
         "source": "apiai-weather-webhook-sample"
         }
     elif req.get("result").get("action") == "consultasaldo":
-        print("Entro a consulta de saldo")
         result = req.get("result")
         parameters = result.get("parameters")
         NICJeson = parameters.get("NIC")
-        print(NICJeson)
         NIC = NICJeson.get("number")
-        print(NIC)
-        #baseurl = "http://www.aeselsalvadormovil.com/aesmovil/WcfMovil/AESMovil.svc/GetInterrupciones/1244050"
         baseurl = "http://www.aeselsalvadormovil.com/aesmovil/WcfMovil/AESMovil.svc/GetDetalleFactura/" + str(NIC)
         result = urlopen(baseurl).read()
-        print(result)
         data = json.loads(result.decode())
-        print(data)
         dataWS=data.get('data')
-        saldo_pagar=dataWS.get('saldo_pagar')
-        print(saldo_pagar)
-        speech="Su saldo a pagar es: " + saldo_pagar
+        if dataWS is None:
+            speech="Estimado cliente, el NIC: "+str(NIC)+" no tiene saldo pendiente en su factura."
+        else:
+            saldo_pagar=dataWS.get('saldo_pagar')
+            vencimiento=dataWS.get('f_vencimiento')
+            npe=dataWS.get('npe')
+            speech="Estimados cliente, su saldo pendiente es: " + saldo_pagar + ", la fecha de vencimiento de su factura es: " + vencimiento
         return {
         "speech": speech,
         "displayText": speech,
         "source": "ConsultaSaldoAES"
-        } 
+        }
+    elif req.get("result").get("action") == "consultanpe":
+        result = req.get("result")
+        parameters = result.get("parameters")
+        NICJeson = parameters.get("NIC")
+        NIC = NICJeson.get("number")
+        baseurl = "http://www.aeselsalvadormovil.com/aesmovil/WcfMovil/AESMovil.svc/GetDetalleFactura/" + str(NIC)
+        result = urlopen(baseurl).read()
+        data = json.loads(result.decode())
+        dataWS=data.get('data')
+        if dataWS is None:
+            speech="Estimado cliente, el NIC: "+str(NIC)+" no tiene saldo pendiente en su factura."
+        else:
+            saldo_pagar=dataWS.get('saldo_pagar')
+            vencimiento=dataWS.get('f_vencimiento')
+            npe=dataWS.get('npe')
+            speech="Estimados cliente, su NPE es: " + npe + ", la fecha de vencimiento de su factura es: " + vencimiento
+        return {
+        "speech": speech,
+        "displayText": speech,
+        "source": "ConsultaNPEAES"
+        }  
     elif req.get("result").get("action") == "yahooWeatherForecast":
         baseurl = "https://query.yahooapis.com/v1/public/yql?"
         yql_query = makeYqlQuery(req)
