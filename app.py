@@ -52,7 +52,7 @@ def processRequest(req):
         print(yql_url)
         result = urlopen(yql_url).read()
         print(result)
-        data = json.loads(result)
+        data = json.loads(result.decode())
         print(data)
         dataWS=data.get('data')
         saldo_pagar=dataWS.get('saldo_pagar')
@@ -77,7 +77,7 @@ def processRequest(req):
         baseurl = "http://www.aeselsalvadormovil.com/aesmovil/WcfMovil/AESMovil.svc/GetDetalleFactura/" + str(NIC)
         result = urlopen(baseurl).read()
         print(result)
-        data = json.loads(result)
+        data = json.loads(result.decode())
         print(data)
         dataWS=data.get('data')
         saldo_pagar=dataWS.get('saldo_pagar')
@@ -96,7 +96,7 @@ def processRequest(req):
         yql_url = baseurl + urlencode({'q': yql_query}) + "&format=json"
         print(yql_url)
         result = urlopen(yql_url).read()
-        data = json.loads(result)
+        data = json.loads(result.decode())
         res = makeWebhookResult(data)
         return res
     else:
