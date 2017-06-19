@@ -15,6 +15,8 @@ from flask import Flask
 from flask import request
 from flask import make_response
 
+import datetime
+
 # Flask app should start in global layout
 app = Flask(__name__)
 
@@ -39,31 +41,33 @@ def processRequest(req):
 
     print(req.get("result").get("action"))
     
-    if req.get("result").get("action") == "nombre":
-        print("entro a nombre")
+    if req.get("result").get("action") == "interrupcion":
         result = req.get("result")
         parameters = result.get("parameters")
-        nombre = parameters.get("nombre")
-        print(nombre)
-        #baseurl = "http://www.aeselsalvadormovil.com/aesmovil/WcfMovil/AESMovil.svc/GetInterrupciones/1244050"
-        baseurl = "http://www.aeselsalvadormovil.com/aesmovil/WcfMovil/AESMovil.svc/GetDetalleFactura/2366498"
-        yql_query = baseurl       
-        yql_url = yql_query #baseurl + urlencode({'q': yql_query}) + "&format=json"
-        print(yql_url)
-        result = urlopen(yql_url).read()
-        print(result)
+        NICJeson = parameters.get("NIC")
+        NIC = NICJeson.get("number")
+        baseurl = "http://www.aeselsalvadormovil.com/aesmovil/WcfMovil/AESMovil.svc/GetInterrupciones/"+str(NIC)
+        result = urlopen(baseurl).read()
         data = json.loads(result.decode())
-        print(data)
         dataWS=data.get('data')
-        saldo_pagar=dataWS.get('saldo_pagar')
-        print(saldo_pagar)
-        res = makeWebhookResult(data)
+        existe=dataWS.get('existe')
+        hora_inicio=dataWS.get('hora_inicio')
+        hora_fin=dataWS.get('hora_fin')
+        if existe=='No se encuentra en ninguna Interrupcion':
+            speech='Estimado cliente, no tenemos reportados problemas en el servicio electrico para el NIC: '+str(NIC)
+        else:
+            if hora_fin is None or hora_fin=='':
+                speech='Estimado cliente lamentamos los inconvenientes en sus servicio electrico, esperamos restablecer el servicio lo mas pronto posible.'
+            else:         
+                fecha_restauracion=datetime.datetime.strptime(str(hora_fin), '%Y%m%d%H%M')
+                speech='Estimado cliente lamentamos los inconvenientes en sus servicio electrico, esperamos restablecer el suministro a las: '+ datetime.date.strftime(fecha_restauracion, "%H:%M del %d/%m/%Y")
+        print(speech)
         return {
-        "speech": "nombre",
-        "displayText": "nombre",
+        "speech": speech,
+        "displayText": speech,
         # "data": data,
         # "contextOut": [],
-        "source": "apiai-weather-webhook-sample"
+        "source": "ConsultaInterrupcionAES"
         }
     elif req.get("result").get("action") == "consultasaldo":
         result = req.get("result")
